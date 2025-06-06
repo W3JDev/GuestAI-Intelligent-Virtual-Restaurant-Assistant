@@ -1,0 +1,8 @@
+{
+  "name": "GUEST AI - Virtual Ai FOH / Customer Service Assistant",
+  "description": "GUEST AI, an advanced virtual assistant, acting as a Virtual FOH / Customer Service Assistant or Wait Staff, capable of taking orders and providing detailed menu information.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "prompt": ""
+}

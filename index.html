@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GUEST AI - Virtual Assistant</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1E1E1E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GuestAI">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="icon" href="/generic-icon.svg" type="image/svg+xml">
+    <link rel="icon" href="/icons/icon-192x192.png" sizes="192x192" type="image/png">
+    <link rel="icon" href="/icons/icon-512x512.png" sizes="512x512" type="image/png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class', // Or 'media' if you prefer OS-level dark mode detection
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              'brand-bg-dark': '#121212', // Main dark background (outer shell)
+              'brand-bg-dark-chat': '#1C1C1E', // Specific for chat area background
+              'brand-surface-dark': '#1E1E1E', // Cards, input fields background
+              'brand-surface-light': '#2A2A2A', // Slightly lighter surface for contrast
+              'brand-primary': '#BB86FC', // Primary accent (purple)
+              'brand-primary-variant': '#3700B3', // Darker variant of primary
+              'brand-secondary': '#03DAC6', // Secondary accent (teal)
+              'brand-text-primary': '#E0E0E0', // Primary text on dark
+              'brand-text-secondary': '#A0A0A0', // Secondary text on dark
+              'brand-text-input-placeholder': '#606060',
+              'brand-user-message-bg': '#303040', // User message bubble
+              'brand-bot-message-bg': '#2A2A2A',   // Bot message bubble
+              'brand-error': '#CF6679',
+              'brand-border': '#3A3A3A', // Borders
+            },
+            boxShadow: {
+              'subtle': '0 2px 10px rgba(0, 0, 0, 0.1)',
+              'card': '0 4px 12px rgba(0, 0, 0, 0.15)',
+              'input-focus': '0 0 0 2px var(--brand-primary)',
+            },
+            borderRadius: {
+              'xl': '0.75rem', 
+              '2xl': '1rem',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      @keyframes subtleGradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(270deg, #1C1C1E, #1F1F22, #1C1C1E); /* brand-bg-dark-chat shades */
+        background-size: 600% 600%;
+        animation: subtleGradientShift 45s ease infinite;
+        color: #E0E0E0; /* brand-text-primary */
+        overscroll-behavior-y: contain; 
+      }
+      /* Custom scrollbar for webkit browsers - Dark Theme */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1E1E1E; /* brand-surface-dark */
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4A4A4A; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #606060;
+      }
+      .gradient-text {
+        background-image: linear-gradient(to right, #BB86FC, #03DAC6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      /* Logo Animations */
+      @keyframes fadeInLogo {
+          to {
+              opacity: 1;
+              transform: scale(1);
+          }
+      }
+
+      @keyframes discPulse {
+          0%, 100% {
+              transform: scale(1);
+          }
+          50% {
+              transform: scale(1.025); /* Slightly increased */
+          }
+      }
+
+      @keyframes centerCirclePulse {
+          0%, 100% {
+              transform: scale(1);
+              filter: brightness(1);
+          }
+          50% {
+              transform: scale(1.08); /* Increased */
+              filter: brightness(1.2);  /* Increased */
+          }
+      }
+      
+      /* Specific styling for embedded SVGs */
+      .app-logo-svg, .send-button-svg-wrapper svg {
+        display: block;
+        overflow: visible; 
+      }
+
+      .app-logo-svg #logo-disc-group-inner {
+          animation: discPulse 8s infinite ease-in-out;
+          transform-origin: center center; 
+          transform-box: fill-box; 
+      }
+      
+      /* Apply to app logo's central circle */
+      .app-logo-svg #logo-center-circle { 
+          animation: centerCirclePulse 4s infinite ease-in-out;
+          transform-box: fill-box;
+          transform-origin: center center;
+      }
+
+      /* Apply to send button's neural icon group */
+      .send-button-svg-wrapper #neural-icon-send-btn {
+          animation: centerCirclePulse 4s infinite ease-in-out;
+          transform-box: fill-box; /* May need to adjust transform-origin if icon isn't centered in its group */
+          transform-origin: center center; 
+      }
+
+       .app-logo-svg { /* Initial state for fade in */
+        opacity: 0;
+        transform: scale(0.9); /* Start slightly smaller */
+        animation: fadeInLogo 1s 0.2s ease-out forwards; /* Faster animation */
+      }
+
+      .dietary-indicator {
+        background-color: var(--brand-primary);
+        color: white;
+        padding: 2px 8px;
+        font-size: 0.7rem; /* Equivalent to text-xs */
+        border-radius: 0.75rem; /* Equivalent to rounded-xl */
+        margin-left: 0.5rem; /* Equivalent to ml-2 */
+        line-height: 1;
+        font-weight: 500;
+      }
+
+      /* Typing indicator animation */
+      .typing-dot {
+        animation: typingPulse 1.4s infinite ease-in-out both;
+      }
+      .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+      .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+      .typing-dot:nth-child(3) { animation-delay: 0s; }
+
+      @keyframes typingPulse { /* Renamed from pulse to avoid conflict if any */
+        0%, 80%, 100% { transform: scale(0); opacity: 0; }
+        40% { transform: scale(1.0); opacity: 1; }
+      }
+
+      /* Modal Animations */
+      @keyframes modalBackdropFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes modalBackdropFadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+      @keyframes modalContentScaleUpFadeIn {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      @keyframes modalContentScaleDownFadeOut {
+        from { opacity: 1; transform: scale(1) translateY(0); }
+        to { opacity: 0; transform: scale(0.95) translateY(10px); }
+      }
+
+      .modal-container.modal-animate-in .modal-backdrop-overlay {
+        animation: modalBackdropFadeIn 0.3s ease-out forwards;
+      }
+      .modal-container.modal-animate-in .modal-content-panel {
+        animation: modalContentScaleUpFadeIn 0.3s ease-out forwards;
+      }
+      .modal-container.modal-animate-out .modal-backdrop-overlay {
+        animation: modalBackdropFadeOut 0.2s ease-in forwards; /* Faster fade out for backdrop */
+      }
+      .modal-container.modal-animate-out .modal-content-panel {
+        animation: modalContentScaleDownFadeOut 0.3s ease-in forwards;
+      }
+
+      /* Onboarding Animations */
+      @keyframes onboardingScreenFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes onboardingScreenFadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+      @keyframes onboardingStepSlideUpFadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes onboardingStepFadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+
+      .onboarding-screen-animate-in {
+        animation: onboardingScreenFadeIn 0.5s ease-out forwards;
+      }
+      .onboarding-screen-animate-out {
+        animation: onboardingScreenFadeOut 0.3s ease-in forwards;
+      }
+      .onboarding-step-animate-in {
+        animation: onboardingStepSlideUpFadeIn 0.4s ease-out forwards;
+      }
+      .onboarding-step-animate-out {
+        animation: onboardingStepFadeOut 0.3s ease-in forwards;
+      }
+
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai?bundle",
+    "lucide-react": "https://esm.sh/lucide-react?bundle"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="text-brand-text-primary antialiased">
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
